@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hanuman Chalisa</title>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root { --ts: 1; }
+
+  body {
+    background: #180800;
+    color: #e8c98a;
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body.ts-small  { --ts: 0.88; }
+  body.ts-large  { --ts: 1.22; }
+
+  /* ── HEADER ── */
+  .hdr {
+    text-align: center;
+    padding: 48px 24px 28px;
+    border-bottom: 1px solid #8b4f0025;
+  }
+  .hdr-om {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-size: 2rem;
+    color: #c9920a;
+    opacity: .55;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .hdr-hin {
+    font-family: 'Crimson Pro', serif;
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-weight: 600;
+    color: #f07030;
+    letter-spacing: .04em;
+  }
+  .hdr-dev {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    color: #f5c050;
+    margin-top: 6px;
+    opacity: .85;
+  }
+  .hdr-rule {
+    width: 60px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #c9920a88, transparent);
+    margin: 20px auto 0;
+  }
+
+  /* ── TEXT SIZE CONTROL ── */
+  .ts-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 16px 18px 0;
+  }
+  .ts-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #8b4f0038;
+    border-radius: 20px;
+    background: #1f0d0080;
+  }
+  .ts-label {
+    font-family: 'Inter', sans-serif;
+    font-size: .56rem;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: #6b4010;
+    padding: 0 8px 0 10px;
+    white-space: nowrap;
+  }
+  .ts-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #a87a30;
+    background: transparent;
+    border: none;
+    border-radius: 16px;
+    padding: 7px 13px;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .ts-btn.active {
+    color: #180800;
+    background: #c9920a;
+  }
+  .ts-btn:not(.active):hover {
+    color: #f5c050;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 0 18px 80px;
+  }
+
+  /* ── SECTION LABEL ── */
+  .sec-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 48px 0 24px;
+  }
+  .sec-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #8b4f0055, transparent);
+  }
+  .sec-text {
+    font-family: 'Inter', sans-serif;
+    font-size: .6rem;
+    font-weight: 500;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #c9920a;
+    opacity: .7;
+    white-space: nowrap;
+  }
+
+  /* ── VERSE BLOCK ── */
+  .verse {
+    margin-bottom: 36px;
+    padding: 18px 16px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .35s ease, opacity .45s ease, border-color .35s ease;
+    border: 1px solid transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* default — all visible but calm */
+  .verse { opacity: 1; }
+
+  /* tapping a verse: highlight box, meaning shown, label swaps to Devanagari.
+     everything else in the page simply dims. nothing reacts to scroll. */
+  .page.has-focus .verse { opacity: .28; }
+  .page.has-focus .verse.focused {
+    opacity: 1;
+    background: #2a1000;
+    border-color: #8b4f0044;
+  }
+
+  /* tag — crossfades between Roman label and Devanagari label */
+  .verse-tag {
+    position: relative;
+    display: inline-block;
+    min-height: 1em;
+    margin-bottom: 10px;
+  }
+  .tag-en, .tag-dev {
+    font-size: .58rem;
+    font-weight: 500;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: #8b5e20;
+    opacity: .8;
+    transition: opacity .45s ease;
+    white-space: nowrap;
+  }
+  .tag-en {
+    font-family: 'Inter', sans-serif;
+  }
+  .tag-dev {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    text-transform: none;
+    letter-spacing: .08em;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+  }
+  .verse.focused .tag-en { opacity: 0; }
+  .verse.focused .tag-dev { opacity: .9; }
+
+  /* Hinglish line */
+  .hin {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 600;
+    color: #f07030;
+    white-space: pre-line;
+    line-height: 1.85;
+    transition: font-size .3s ease;
+  }
+
+  /* Devanagari line */
+  .dev {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    color: #f5c050;
+    white-space: pre-line;
+    line-height: 2;
+    margin-top: 8px;
+    opacity: .88;
+    transition: font-size .3s ease;
+  }
+
+  /* SIZES — one consistent size per text-size mode, scaled by --ts.
+     Size never changes when a verse is focused, so words never rewrap —
+     only the Text Size control (Small/Default/Large) changes it. */
+  .hin { font-size: calc(clamp(1rem, 2.5vw, 1.18rem) * var(--ts)); }
+  .dev { font-size: calc(clamp(.96rem, 2.3vw, 1.12rem) * var(--ts)); }
+
+  /* meaning — hidden by default, shown only for the tapped/focused verse */
+  .meaning {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height .4s ease, opacity .35s ease, margin-top .3s ease;
+    margin-top: 0;
+  }
+  .verse.focused .meaning {
+    max-height: 320px;
+    opacity: 1;
+    margin-top: 14px;
+  }
+  .meaning-inner {
+    border-left: 2px solid #8b4f0055;
+    padding-left: 12px;
+  }
+  .meaning-lbl {
+    font-family: 'Inter', sans-serif;
+    font-size: .56rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #8b5e20;
+    margin-bottom: 5px;
+  }
+  .meaning-lbl-hi {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    text-transform: none;
+  }
+  .meaning-lbl-en {
+    margin-top: 12px;
+  }
+  .meaning-txt {
+    font-style: italic;
+    font-size: calc(clamp(.85rem, 2vw, .95rem) * var(--ts));
+    color: #b08040;
+    line-height: 1.65;
+  }
+  .meaning-txt.meaning-hin {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-style: normal;
+  }
+
+  /* tap hint */
+  .tap-hint {
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    color: #8b5e20;
+    opacity: .5;
+    padding: 10px 0 0;
+    margin-bottom: -10px;
+  }
+
+  /* ── FOOTER ── */
+  .foot {
+    text-align: center;
+    padding: 36px 20px 56px;
+    border-top: 1px solid #8b4f0020;
+  }
+  .foot-bless {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-style: normal;
+    color: #f5c050;
+    font-size: 1.15rem;
+    opacity: .85;
+    margin-bottom: 18px;
+    letter-spacing: .04em;
+  }
+  .foot-made {
+    font-family: 'Inter', sans-serif;
+    font-size: .68rem;
+    font-weight: 500;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #6b4010;
+    opacity: .65;
+  }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <span class="hdr-om">ॐ</span>
+  <div class="hdr-hin">Shri Hanuman Chalisa</div>
+  <div class="hdr-dev">श्री हनुमान चालीसा</div>
+  <div class="hdr-rule"></div>
+</header>
+
+<div class="ts-wrap">
+  <div class="ts-ctrl" role="group" aria-label="Text size">
+    <span class="ts-label">Text Size</span>
+    <button type="button" class="ts-btn" data-size="small">Small</button>
+    <button type="button" class="ts-btn" data-size="default">Default</button>
+    <button type="button" class="ts-btn" data-size="large">Large</button>
+  </div>
+</div>
+
+<div class="page" id="page">
+  <p class="tap-hint">TAP ANY VERSE TO FOCUS</p>
+</div>
+
+<footer class="foot">
+  <div class="foot-bless">॥ जय हनुमान ॥</div>
+  <div class="foot-made">Made by Paritosh</div>
+</footer>
+
+<script>
+const DATA = [
+  { sec:"Opening Doha", verses:[
+    { tag:"Doha 1",
+      hin:"Shree Guru Charan Saroj Raj, Nij Man Mukur Sudhaari\nBarnau Raghubar Bimal Jasu, Jo Daayaku Phal Chaari",
+      dev:"श्री गुरु चरण सरोज रज, निज मन मुकुर सुधारि।\nबरनउँ रघुबर बिमल जसु, जो दायकु फल चारि॥",
+      mean:"I clean the mirror of my mind with the dust from the lotus feet of my Guru. I sing the pure glory of Lord Ram, which grants the four fruits of life.",
+      meanHin:"श्री गुरु के चरण-कमलों की धूल से मैं अपने मन रूपी दर्पण को स्वच्छ करता हूँ, और श्री रघुवर के निर्मल यश का वर्णन करता हूँ, जो चारों फल देने वाला है।" },
+    { tag:"Doha 2",
+      hin:"Buddhi-heen Tanu Jaanike, Sumirau Pavan Kumaar\nBal Buddhi Vidyaa Dehu Mohi, Harahu Kalesh Bikaar",
+      dev:"बुद्धिहीन तनु जानिके, सुमिरौं पवन कुमार।\nबल बुधि विद्या देहु मोहिं, हरहु कलेस विकार॥",
+      mean:"Knowing I lack wisdom, I pray to you, son of the Wind. Please give me strength, wisdom, and knowledge, and remove all my sorrows and impurities.",
+      meanHin:"स्वयं को बुद्धिहीन जानकर मैं पवनपुत्र हनुमान का स्मरण करता हूँ। हे हनुमान, मुझे बल, बुद्धि और विद्या दीजिए तथा मेरे सभी क्लेश और विकार दूर कीजिए।" }
+  ]},
+  { sec:"Chaupai — His Form & Glory", verses:[
+    { tag:"Verse 1", hin:"Jai Hanuman gyaan gun saagar\nJai Kapis tihun lok ujaagar", dev:"जय हनुमान ज्ञान गुन सागर।\nजय कपीस तिहुँ लोक उजागर॥", mean:"Victory to you, Hanuman, an ocean of wisdom and virtue! Victory to the Monkey God who illuminates the three worlds.",
+      meanHin:"हे हनुमान, आप ज्ञान और गुणों के सागर हैं, आपकी जय हो! हे कपीश्वर, आप तीनों लोकों में प्रकाशमान हैं, आपकी जय हो!" },
+    { tag:"Verse 2", hin:"Ram doot atulit bal dhaama\nAnjani-putra Pavan sut naama", dev:"राम दूत अतुलित बल धामा।\nअंजनि-पुत्र पवनसुत नामा॥", mean:"You are Lord Ram's messenger, possessing unequalled strength. Known as the son of mother Anjani and the Wind God.",
+      meanHin:"आप श्री राम के दूत हैं और अतुलनीय बल के धाम हैं। आप माता अंजनी के पुत्र और पवनपुत्र के नाम से जाने जाते हैं।" },
+    { tag:"Verse 3", hin:"Mahabeer bikram Bajrangi\nKumati nivaar sumati ke sangi", dev:"महाबीर बिक्रम बजरंगी।\nकुमति निवार सुमति के संगी॥", mean:"Mighty warrior with a body like a thunderbolt, who removes bad thoughts and blesses us with good wisdom.",
+      meanHin:"आप महावीर, पराक्रमी और वज्र के समान शरीर वाले हैं। आप कुबुद्धि को दूर करने वाले और सद्बुद्धि वालों के सखा हैं।" },
+    { tag:"Verse 4", hin:"Kanchan baran biraaj subesa\nKaanan kundal kunchit kesa", dev:"कंचन बरन बिराज सुबेसा।\nकानन कुंडल कुंचित केसा॥", mean:"You have a beautiful golden complexion, wearing ear-rings and having curly hair.",
+      meanHin:"आपका वर्ण स्वर्ण के समान है, आप सुंदर वस्त्र धारण किए हुए हैं। आपके कानों में कुंडल हैं और आपके बाल घुँघराले हैं।" }
+  ]},
+  { sec:"Chaupai — Wisdom & Devotion", verses:[
+    { tag:"Verse 5", hin:"Hath vajra aur dhuvaje biraaje\nKaandhe moonj janeu saaje", dev:"हाथ बज्र अरु ध्वजा बिराजे।\nकाँधे मूँज जनेऊ साजे॥", mean:"You hold a thunderbolt and a flag in your hands, and a sacred thread rests on your shoulder.",
+      meanHin:"आपके हाथों में वज्र और ध्वजा सुशोभित है, और आपके कंधे पर मूँज का जनेऊ शोभा देता है।" },
+    { tag:"Verse 6", hin:"Sankar suvan Kesari nandan\nTej prataap maha jag bandan", dev:"संकर सुवन केसरीनंदन।\nतेज प्रताप महा जग बंदन॥", mean:"You are the incarnation of Lord Shiva and the joy of Kesari. Your glory is worshipped by the whole world.",
+      meanHin:"आप भगवान शिव के अवतार और केसरी नंदन हैं। आपका तेज और प्रताप संपूर्ण जगत में वंदनीय है।" },
+    { tag:"Verse 7", hin:"Vidyavaan guni ati chaatur\nRam kaaj karibe ko aatur", dev:"विद्यावान गुनी अति चातुर।\nराम काज करिबे को आतुर॥", mean:"Highly educated, virtuous, and extremely clever — always eager to do Lord Ram's work.",
+      meanHin:"आप विद्यावान, गुणवान और अत्यंत चतुर हैं। आप सदा श्री राम का कार्य करने के लिए आतुर रहते हैं।" },
+    { tag:"Verse 8", hin:"Prabhu charitra sunibe ko rasiya\nRam Lakhan Sita man basiya", dev:"प्रभु चरित्र सुनिबे को रसिया।\nराम लखन सीता मन बसिया॥", mean:"You delight in listening to stories of the Lord, and Ram, Lakshman, and Sita always reside in your heart.",
+      meanHin:"आप प्रभु की कथाएँ सुनने में रस लेते हैं। श्री राम, लक्ष्मण और सीता सदैव आपके मन में बसते हैं।" }
+  ]},
+  { sec:"Chaupai — Adventures in Lanka", verses:[
+    { tag:"Verse 9", hin:"Sukshma roop dhari Siyahi dikhaava\nVikat roop dhari Lanka jalaava", dev:"सूक्ष्म रूप धरि सियहिं दिखावा।\nबिकट रूप धरि लंक जरावा॥", mean:"You took a tiny form to appear before Mother Sita, and a terrifying giant form to burn the city of Lanka.",
+      meanHin:"आपने सूक्ष्म रूप धारण कर माता सीता को दर्शन दिए, और विकराल रूप धारण कर लंका को जला डाला।" },
+    { tag:"Verse 10", hin:"Bheem roop dhari asur sanhaare\nRamchandra ke kaaj sanvaare", dev:"भीम रूप धरि असुर संहारे।\nरामचंद्र के काज संवारे॥", mean:"You took a massive form to destroy the demons and complete Lord Ram's missions.",
+      meanHin:"आपने विशाल रूप धारण कर असुरों का संहार किया और श्री रामचंद्र के सभी कार्य सिद्ध किए।" },
+    { tag:"Verse 11", hin:"Laaye Sanjivan Lakhan jiyaaye\nShri Raghuvir harashi ur laaye", dev:"लाए सजीवन लखन जियाए।\nश्री रघुबीर हरषि उर लाए॥", mean:"You brought the Sanjivani herb to save Lakshman's life, and Lord Ram joyfully embraced you.",
+      meanHin:"आप संजीवनी बूटी लाकर लक्ष्मण को जीवित कर लाए, जिससे श्री रघुवीर ने हर्षित होकर आपको हृदय से लगाया।" },
+    { tag:"Verse 12", hin:"Raghupati kinhi bahut badhaai\nTum mam priye Bharat-hi sam bhaai", dev:"रघुपति कीन्ही बहुत बड़ाई।\nतुम मम प्रिय भरतहि सम भाई॥", mean:'Lord Ram praised you highly, saying "You are as dear to me as my brother Bharat."',
+      meanHin:'श्री रघुपति ने आपकी बहुत प्रशंसा की और कहा, "तुम मुझे भरत के समान ही प्रिय हो।"' }
+  ]},
+  { sec:"Chaupai — Praised by the Gods", verses:[
+    { tag:"Verse 13", hin:"Sahas badan tumharo yash gaave\nUs kahi Shripati kanth lagaave", dev:"सहस बदन तुम्हरो जस गावैं।\nअस कहि श्रीपति कंठ लगावैं॥", mean:'Lord Ram said "Even the thousand-headed serpent sings your glory" as he embraced you.',
+      meanHin:'सहस्र मुख वाले शेषनाग भी आपका यश गाते हैं — ऐसा कहकर श्री रामचंद्र ने आपको अपने हृदय से लगाया।' },
+    { tag:"Verse 14", hin:"Sankadik Brahmadi Muneesa\nNarad Sarad sahit Aheesa", dev:"संकादिक ब्रह्मादि मुनीसा।\nनारद सारद सहित अहीसा॥", mean:"Saints, sages, Lord Brahma, Narad, and Goddess Saraswati cannot fully describe your greatness.",
+      meanHin:"सनकादिक ऋषि, ब्रह्मा जी, मुनिगण, नारद जी, सरस्वती और शेषनाग भी आपकी महिमा का पूर्ण वर्णन नहीं कर सकते।" },
+    { tag:"Verse 15", hin:"Yum Kuber Digpal kahan te\nKavi kovid kahi sake kahan te", dev:"यम कुबेर दिगपाल जहाँ ते।\nकबि कोबिद कहि सके कहाँ ते॥", mean:"Even the Gods of Death, Wealth, and Guardians of the Directions fail to find words to describe you.",
+      meanHin:"यमराज, कुबेर, दिक्पाल और बड़े-बड़े कवि भी आपके गुणों का वर्णन करने में असमर्थ हैं।" },
+    { tag:"Verse 16", hin:"Tum upkaar Sugreevahin keenha\nRam milaaye raajpad deenha", dev:"तुम उपकार सुग्रीवहिं कीन्हा।\nराम मिलाए राजपद दीन्हा॥", mean:"You did a great favor for Sugreeva by uniting him with Lord Ram, which helped him regain his kingdom.",
+      meanHin:"आपने सुग्रीव पर बड़ा उपकार किया, उन्हें श्री राम से मिलाकर राजपद प्रदान करवाया।" }
+  ]},
+  { sec:"Chaupai — Miracles & Power", verses:[
+    { tag:"Verse 17", hin:"Tumharo mantra Vibheeshan maana\nLankeshwar bhaye sab jag jaana", dev:"तुम्हरो मंत्र विभीषन माना।\nलंकेस्वर भए सब जग जाना॥", mean:"Vibhishan accepted your advice and became King of Lanka — a fact known to the whole world.",
+      meanHin:"आपकी सलाह विभीषण ने मानी, जिससे वे लंका के राजा बने — यह बात सारा संसार जानता है।" },
+    { tag:"Verse 18", hin:"Yug sahasra yojan par Bhaanu\nLeelyo taahi madhur phal jaanu", dev:"युग सहस्त्र योजन पर भानू।\nलील्यो ताहि मधुर फल जानू॥", mean:"As a baby, you leaped thousands of miles to swallow the sun, thinking it was a sweet fruit.",
+      meanHin:"जो सूर्य हजारों योजन दूर है, आपने बचपन में उसे मीठा फल समझकर निगल लिया था।" },
+    { tag:"Verse 19", hin:"Prabhu mudrika meli mukh maahee\nJaladhi laanghi gaye achraj naahee", dev:"प्रभु मुद्रिका मेलि मुख माहीं।\nजलधि लाँघि गए अचरज नाहीं॥", mean:"Carrying Lord Ram's ring in your mouth, you leaped across the vast ocean — it is no surprise!",
+      meanHin:"प्रभु की अंगूठी मुख में रखकर आप बिना किसी आश्चर्य के समुद्र लांघ गए।" },
+    { tag:"Verse 20", hin:"Durgam kaaj jagat ke jete\nSugam anugraha tumhare tete", dev:"दुर्गम काज जगत के जेते।\nसुगम अनुग्रह तुम्हरे तेते॥", mean:"All the difficult tasks in the world become easy with your grace.",
+      meanHin:"संसार के जितने भी कठिन कार्य हैं, वे सब आपकी कृपा से सुगम हो जाते हैं।" }
+  ]},
+  { sec:"Chaupai — The Great Protector", verses:[
+    { tag:"Verse 21", hin:"Ram duwaare tum rakhvaare\nHoat na agya binu paisaare", dev:"राम द्वारे तुम रखवारे।\nहोत न आज्ञा बिनु पैसारे॥", mean:"You are the gatekeeper of Lord Ram's kingdom; no one can enter without your permission.",
+      meanHin:"आप श्री राम के द्वार के रखवाले हैं; आपकी आज्ञा के बिना कोई भीतर प्रवेश नहीं कर सकता।" },
+    { tag:"Verse 22", hin:"Sab sukh lahai tumhaari sarnaa\nTum rakshak kaahu ko darnaa", dev:"सब सुख लहैं तुम्हारी सरना।\nतुम रक्षक काहू को डरना॥", mean:"Those who take shelter in you enjoy all happiness, and with you as protector, there is nothing to fear.",
+      meanHin:"जो आपकी शरण में आते हैं, वे सब सुख पाते हैं। आपके रक्षक होते हुए किसी को कोई भय नहीं रहता।" },
+    { tag:"Verse 23", hin:"Aapan tej samhaaro aape\nTeenon lok haank te kaanpe", dev:"आपन तेज सम्हारो आपे।\nतीनों लोक हाँक ते काँपे॥", mean:"Only you can control your incredible energy; when you roar, the three worlds tremble.",
+      meanHin:"अपने तेज को केवल आप ही संभाल सकते हैं; आपकी गर्जना से तीनों लोक कांप उठते हैं।" },
+    { tag:"Verse 24", hin:"Bhoot pishach nikat nahin aave\nMahavir jab naam sunaave", dev:"भूत पिसाच निकट नहिं आवे।\nमहाबीर जब नाम सुनावे॥", mean:"Ghosts and evil spirits do not even come near those who chant your name, Mahavir.",
+      meanHin:"जहाँ महावीर हनुमान का नाम सुनाई देता है, वहाँ भूत-पिशाच निकट नहीं आते।" }
+  ]},
+  { sec:"Chaupai — Destroyer of Sorrow", verses:[
+    { tag:"Verse 25", hin:"Naase rog hare sab peera\nJapat nirantar Hanumant beera", dev:"नासे रोग हरे सब पीरा।\nजपत निरंतर हनुमत बीरा॥", mean:"By constantly chanting your name, brave Hanuman, all diseases are destroyed and all pains vanish.",
+      meanHin:"हे वीर हनुमान, निरंतर आपका जप करने से सारे रोग नष्ट हो जाते हैं और सभी पीड़ाएँ दूर हो जाती हैं।" },
+    { tag:"Verse 26", hin:"Sankat se Hanuman chhuddaave\nMan kram vachan dhyaan jo laave", dev:"संकट से हनुमान छुड़ावे।\nमन क्रम बचन ध्यान जो लावे॥", mean:"You free from all troubles those who remember you in thoughts, words, and actions.",
+      meanHin:"जो मन, वचन और कर्म से आपका ध्यान करता है, हे हनुमान, आप उसे सभी संकटों से मुक्त कर देते हैं।" },
+    { tag:"Verse 27", hin:"Sab par Ram tapasvee raaja\nTin ke kaaj sakal tum saaja", dev:"सब पर राम तपस्वी राजा।\nतिन के काज सकल तुम साजा॥", mean:"Lord Ram is the supreme ascetic King over all, yet you carry out all His tasks effortlessly.",
+      meanHin:"श्री राम तपस्वियों के राजा हैं, और आप उनके सभी कार्य सहजता से पूर्ण करते हैं।" },
+    { tag:"Verse 28", hin:"Aur manorath jo koi laave\nSoi amit jeevan phal paave", dev:"और मनोरथ जो कोई लावे।\nसोई अमित जीवन फल पावे॥", mean:"Anyone who brings their wishes to you will receive the boundless fruits of life.",
+      meanHin:"जो कोई भी आपके पास अपनी मनोकामना लेकर आता है, उसे जीवन के अनंत फल प्राप्त होते हैं।" }
+  ]},
+  { sec:"Chaupai — Eternal Glory", verses:[
+    { tag:"Verse 29", hin:"Chaaron yug partaap tumhaara\nHai parasiddh jagat ujiyaara", dev:"चारों जुग परताप तुम्हारा।\nहै परसिद्ध जगत उजियारा॥", mean:"Your glory spreads across all four ages, and your light illuminates the entire world.",
+      meanHin:"आपका प्रताप चारों युगों में फैला हुआ है, और आपकी कीर्ति सारे संसार में प्रसिद्ध और उज्ज्वल है।" },
+    { tag:"Verse 30", hin:"Saadhu sant ke tum rakhvaare\nAsur nikandan Ram dulaare", dev:"साधु संत के तुम रखवारे।\nअसुर निकंदन राम दुलारे॥", mean:"You are the protector of saints and sages, destroyer of demons, and the beloved of Lord Ram.",
+      meanHin:"आप साधु-संतों के रक्षक हैं, असुरों का नाश करने वाले हैं, और श्री राम के अत्यंत प्रिय हैं।" },
+    { tag:"Verse 31", hin:"Ashta siddhi nav nidhi ke daata\nAs var deen Jaanki maata", dev:"अष्ट सिद्धि नव निधि के दाता।\nअस बर दीन जानकी माता॥", mean:"Mother Sita granted you a boon to give the eight mystic powers (Siddhis) and nine types of wealth (Nidhis) to devotees.",
+      meanHin:"माता जानकी ने आपको यह वरदान दिया कि आप अष्ट सिद्धियाँ और नौ निधियाँ भक्तों को प्रदान कर सकें।" },
+    { tag:"Verse 32", hin:"Ram rasayan tumhare paasa\nSada raho Raghupati ke daasa", dev:"राम रसायन तुम्हरे पासा।\nसदा रहो रघुपति के दासा॥", mean:"You hold the essence of devotion to Ram, and you will forever remain His faithful servant.",
+      meanHin:"आपके पास राम-भक्ति रूपी अमृत सदैव है, और आप सदा श्री रघुपति के सेवक बने रहते हैं।" }
+  ]},
+  { sec:"Chaupai — Finding God Through Hanuman", verses:[
+    { tag:"Verse 33", hin:"Tumhare bhajan Ram ko paave\nJanam janam ke dukh bisraave", dev:"तुम्हरे भजन राम को पावे।\nजनम जनम के दुख बिसरावे॥", mean:"By singing your praises, people find Lord Ram and their sorrows from many past lives are washed away.",
+      meanHin:"आपके भजन से मनुष्य को श्री राम की प्राप्ति होती है और उसके जन्म-जन्मांतर के दुःख मिट जाते हैं।" },
+    { tag:"Verse 34", hin:"Anta kaal Raghubar pur jaayi\nJahan janma Hari-bhakt kahaayi", dev:"अंत काल रघुबर पुर जाई।\nजहाँ जन्म हरि भक्त कहाई॥", mean:"At the end of their lives they go to Lord Ram's eternal home, and wherever born they are known as God's devotees.",
+      meanHin:"अंत समय में वह श्री राम के धाम को जाता है, और जहाँ भी जन्म लेता है, हरिभक्त कहलाता है।" },
+    { tag:"Verse 35", hin:"Aur devta chitt na dharayi\nHanumant seyi sarva sukh karayi", dev:"और देवता चित्त न धराई।\nहनुमत सेई सर्व सुख करई॥", mean:"A devotee need not worship any other deity; serving Hanuman alone brings all happiness.",
+      meanHin:"भक्त को किसी अन्य देवता का ध्यान करने की आवश्यकता नहीं; हनुमान जी की सेवा ही समस्त सुख प्रदान करती है।" },
+    { tag:"Verse 36", hin:"Sankat kate mite sab peera\nJo sumire Hanumant Balbeera", dev:"संकट कटे मिटे सब पीरा।\nजो सुमिरे हनुमत बलबीरा॥", mean:"All troubles are cut away and pains removed for those who remember the mighty Hanuman.",
+      meanHin:"जो बलवीर हनुमान का स्मरण करता है, उसके सभी संकट और पीड़ाएँ मिट जाती हैं।" }
+  ]},
+  { sec:"Chaupai — The Promise", verses:[
+    { tag:"Verse 37", hin:"Jai Jai Jai Hanuman Gosaain\nKripa karahu Gurudev ki nyaain", dev:"जय जय जय हनुमान गोसाईं।\nकृपा करहु गुरुदेव की नाईं॥", mean:"Victory, victory, victory to you, Lord Hanuman! Please shower your grace on me like a supreme Guru.",
+      meanHin:"हे हनुमान गोसाईं, आपकी जय हो, जय हो, जय हो! कृपया गुरुदेव के समान मुझ पर कृपा कीजिए।" },
+    { tag:"Verse 38", hin:"Jo shat baar paath kar koi\nChhutahi bandi maha sukh hoi", dev:"जो सत बार पाठ कर कोई।\nछूटहि बंदि महा सुख होई॥", mean:"Whoever recites this Chalisa a hundred times will be freed from the bondage of life and death and enjoy supreme bliss.",
+      meanHin:"जो कोई इस चालीसा का सौ बार पाठ करता है, वह बंधनों से मुक्त होकर परम सुख प्राप्त करता है।" },
+    { tag:"Verse 39", hin:"Jo yah padhe Hanuman Chalisa\nHoye siddhi saakhi Gaurisa", dev:"जो यह पढ़े हनुमान चालीसा।\nहोय सिद्धि साखी गौरीसा॥", mean:"Whoever reads this Hanuman Chalisa will achieve spiritual perfection, as Lord Shiva himself is the witness.",
+      meanHin:"जो कोई हनुमान चालीसा पढ़ता है, उसे सिद्धि प्राप्त होती है — इसके साक्षी स्वयं भगवान शिव हैं।" },
+    { tag:"Verse 40", hin:"Tulsidas sada Hari chera\nKeejai naath hriday mahn dera", dev:"तुलसीदास सदा हरि चेरा।\nकीजे नाथ हृदय मँह डेरा॥", mean:'Tulsidas, always a servant of the Lord, prays: "O Lord, please make your home forever in my heart."',
+      meanHin:'तुलसीदास सदा हरि के सेवक हैं; वे प्रार्थना करते हैं, "हे नाथ, मेरे हृदय में सदा निवास कीजिए।"' }
+  ]},
+  { sec:"Closing Doha", verses:[
+    { tag:"Closing Doha",
+      hin:"Pavantanaye sankat haran, Mangal murati roop\nRam Lakhan Sita sahit, Hriday basahu sur bhoop",
+      dev:"पवनतनय संकट हरन, मंगल मूरति रूप।\nराम लखन सीता सहित, हृदय बसहु सुर भूप॥",
+      mean:"O Son of the Wind God, remover of difficulties, embodiment of auspiciousness! Please come and live forever in my heart along with Lord Ram, Lakshman, and Mother Sita.",
+      meanHin:"हे पवनपुत्र, संकटों के हरने वाले, मंगल स्वरूप! श्री राम, लक्ष्मण और माता सीता सहित आप मेरे हृदय में सदा निवास करें।" }
+  ]}
+];
+
+const page = document.getElementById('page');
+
+/* ── Devanagari label helpers ── */
+const DEV_DIGITS = {'0':'०','1':'१','2':'२','3':'३','4':'४','5':'५','6':'६','7':'७','8':'८','9':'९'};
+function toDevNum(n){ return String(n).split('').map(d => DEV_DIGITS[d] ?? d).join(''); }
+function devTagFor(tag){
+  let m = tag.match(/^Verse (\d+)$/);
+  if (m) return 'चौपाई ' + toDevNum(m[1]);
+  m = tag.match(/^Doha (\d+)$/);
+  if (m) return 'दोहा ' + toDevNum(m[1]);
+  if (tag === 'Closing Doha') return 'समापन दोहा';
+  return tag;
+}
+
+/* ── Build DOM ── */
+const verseEls = [];
+DATA.forEach(sec => {
+  const sl = document.createElement('div');
+  sl.className = 'sec-label';
+  sl.innerHTML = `<div class="sec-line"></div><div class="sec-text">${sec.sec}</div><div class="sec-line"></div>`;
+  page.appendChild(sl);
+
+  sec.verses.forEach(v => {
+    const el = document.createElement('div');
+    el.className = 'verse';
+    el.innerHTML =
+      `<div class="verse-tag"><span class="tag-en">${v.tag}</span><span class="tag-dev">${devTagFor(v.tag)}</span></div>` +
+      `<div class="hin">${v.hin.replace(/\n/g,'<br>')}</div>` +
+      `<div class="dev">${v.dev.replace(/\n/g,'<br>')}</div>` +
+      `<div class="meaning"><div class="meaning-inner">` +
+        `<div class="meaning-lbl meaning-lbl-hi">अर्थ</div>` +
+        `<div class="meaning-txt meaning-hin">${v.meanHin}</div>` +
+        `<div class="meaning-lbl meaning-lbl-en">Meaning</div>` +
+        `<div class="meaning-txt meaning-en">${v.mean}</div>` +
+      `</div></div>`;
+
+    el.addEventListener('click', () => {
+      if (focused === el) {
+        // tap the focused verse again → unfocus
+        el.classList.remove('focused');
+        page.classList.remove('has-focus');
+        focused = null;
+      } else {
+        if (focused) focused.classList.remove('focused');
+        el.classList.add('focused');
+        page.classList.add('has-focus');
+        focused = el;
+      }
+    });
+
+    page.appendChild(el);
+    verseEls.push(el);
+  });
+});
+
+/* ── Tap-to-focus only. Nothing here reacts to scrolling — highlighting,
+   the meaning panel, and the Devanagari label swap all happen purely
+   because a verse was tapped. ── */
+let focused = null;
+
+// tap outside any verse → clear focus
+document.addEventListener('click', e => {
+  if (focused && !e.target.closest('.verse')) {
+    focused.classList.remove('focused');
+    page.classList.remove('has-focus');
+    focused = null;
+  }
+});
+
+/* ── Text size control ── */
+const tsButtons = document.querySelectorAll('.ts-btn');
+function applyTextSize(size, persist){
+  document.body.classList.remove('ts-small', 'ts-large');
+  if (size === 'small') document.body.classList.add('ts-small');
+  else if (size === 'large') document.body.classList.add('ts-large');
+  tsButtons.forEach(b => b.classList.toggle('active', b.dataset.size === size));
+  if (persist) {
+    try { localStorage.setItem('chalisa-text-size', size); } catch (e) {}
+  }
+}
+tsButtons.forEach(btn => {
+  btn.addEventListener('click', () => applyTextSize(btn.dataset.size, true));
+});
+let savedSize = 'default';
+try { savedSize = localStorage.getItem('chalisa-text-size') || 'default'; } catch (e) {}
+applyTextSize(savedSize, false);
+</script>
+</body>
+</html>
