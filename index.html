@@ -18,13 +18,12 @@
     overflow-x: hidden;
   }
 
-  body.ts-large  { --ts: 1.22; }
-  body.ts-larger { --ts: 1.52; }
+  body.ts-large { --ts: 1.22; }
 
   /* ── HEADER ── */
   .hdr {
     text-align: center;
-    padding: 48px 24px 28px;
+    padding: clamp(28px, 6vw, 48px) 24px 28px;
     border-bottom: 1px solid #8b4f0025;
   }
   .hdr-om {
@@ -37,14 +36,14 @@
   }
   .hdr-hin {
     font-family: 'Crimson Pro', serif;
-    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-size: clamp(1.2rem, 4vw, 1.9rem);
     font-weight: 600;
     color: #f07030;
     letter-spacing: .04em;
   }
   .hdr-dev {
     font-family: 'Tiro Devanagari Sanskrit', serif;
-    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    font-size: clamp(1rem, 3.5vw, 1.6rem);
     color: #f5c050;
     margin-top: 6px;
     opacity: .85;
@@ -56,11 +55,14 @@
     margin: 20px auto 0;
   }
 
-  /* ── TEXT SIZE CONTROL ── */
+  /* ── TEXT SIZE + HINDI CONTROLS ── */
   .ts-wrap {
     display: flex;
     justify-content: center;
-    padding: 16px 18px 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 16px 0;
   }
   .ts-ctrl {
     display: flex;
@@ -70,6 +72,7 @@
     border: 1px solid #8b4f0038;
     border-radius: 20px;
     background: #1f0d0080;
+    flex-shrink: 0;
   }
   .ts-label {
     font-family: 'Inter', sans-serif;
@@ -99,15 +102,52 @@
     color: #180800;
     background: #c9920a;
   }
-  .ts-btn:not(.active):hover {
-    color: #f5c050;
+  .ts-btn:not(.active):hover { color: #f5c050; }
+
+  /* ── HINDI TOGGLE ── */
+  .hindi-btn {
+    font-family: 'Tiro Devanagari Sanskrit', serif;
+    font-size: .85rem;
+    color: #6b7fa0;
+    background: transparent;
+    border: 1px solid #3a4f6a44;
+    border-radius: 20px;
+    padding: 6px 16px;
+    cursor: pointer;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+    transition: background .25s ease, color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    white-space: nowrap;
+  }
+  .hindi-btn:hover {
+    color: #a0b8d8;
+    border-color: #4a6a9055;
+  }
+  .hindi-btn.active {
+    color: #c8dff5;
+    background: linear-gradient(135deg, #1a2f4a, #0f1e30);
+    border-color: #4a7aaa88;
+    box-shadow: 0 0 12px #2a5a9033, inset 0 1px 0 #ffffff11;
   }
 
   /* ── PAGE ── */
   .page {
     max-width: 620px;
     margin: 0 auto;
-    padding: 0 18px 80px;
+    padding: 0 16px 80px;
+    transition: filter .5s ease, opacity .5s ease;
+  }
+
+  /* ── HINDI MODE ── */
+  body.hindi-switching .page {
+    filter: blur(6px);
+    opacity: 0;
+  }
+  body.hindi-mode .hin {
+    display: none;
+  }
+  body.hindi-mode .dev {
+    margin-top: 0;
   }
 
   /* ── SECTION LABEL ── */
@@ -115,7 +155,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin: 48px 0 24px;
+    margin: 44px 0 22px;
   }
   .sec-line {
     flex: 1;
@@ -135,8 +175,8 @@
 
   /* ── VERSE BLOCK ── */
   .verse {
-    margin-bottom: 36px;
-    padding: 18px 16px 20px;
+    margin-bottom: 32px;
+    padding: 16px 14px 18px;
     border-radius: 10px;
     cursor: pointer;
     transition: background .35s ease, opacity .45s ease, border-color .35s ease;
@@ -144,12 +184,8 @@
     user-select: none;
     -webkit-user-select: none;
   }
-
-  /* default — all visible but calm */
   .verse { opacity: 1; }
 
-  /* tapping a verse: highlight box, meaning shown, label swaps to Devanagari.
-     everything else in the page simply dims. nothing reacts to scroll. */
   .page.has-focus .verse { opacity: .28; }
   .page.has-focus .verse.focused {
     opacity: 1;
@@ -157,7 +193,7 @@
     border-color: #8b4f0044;
   }
 
-  /* tag — crossfades between Roman label and Devanagari label */
+  /* ── VERSE TAG ── */
   .verse-tag {
     position: relative;
     display: inline-block;
@@ -174,9 +210,7 @@
     transition: opacity .45s ease;
     white-space: nowrap;
   }
-  .tag-en {
-    font-family: 'Inter', sans-serif;
-  }
+  .tag-en { font-family: 'Inter', sans-serif; }
   .tag-dev {
     font-family: 'Tiro Devanagari Sanskrit', serif;
     text-transform: none;
@@ -189,20 +223,22 @@
   .verse.focused .tag-en { opacity: 0; }
   .verse.focused .tag-dev { opacity: .9; }
 
-  /* Hinglish line */
+  /* ── HINGLISH LINE ── */
   .hin {
     font-family: 'Crimson Pro', serif;
     font-weight: 600;
     color: #f07030;
     line-height: 2.1;
+    font-size: calc(clamp(1rem, 2.8vw, 1.28rem) * var(--ts));
     transition: font-size .3s ease;
   }
   .hin .pada {
     display: block;
-    white-space: nowrap;
+    white-space: normal;        /* ← was nowrap — fixes overflow on small phones */
+    word-break: break-word;
   }
 
-  /* Devanagari line */
+  /* ── DEVANAGARI LINE ── */
   .dev {
     font-family: 'Tiro Devanagari Sanskrit', serif;
     color: #f5c050;
@@ -210,25 +246,20 @@
     line-height: 2.2;
     margin-top: 8px;
     opacity: .88;
+    font-size: calc(clamp(1rem, 2.5vw, 1.2rem) * var(--ts));
     transition: font-size .3s ease;
   }
 
-  /* SIZES — one consistent size per text-size mode, scaled by --ts.
-     Size never changes when a verse is focused, so words never rewrap —
-     only the Text Size control (Small/Default/Large) changes it. */
-  .hin { font-size: calc(clamp(1.1rem, 2.8vw, 1.28rem) * var(--ts)); }
-  .dev { font-size: calc(clamp(1.05rem, 2.5vw, 1.2rem) * var(--ts)); }
-
-  /* meaning — hidden by default, shown only for the tapped/focused verse */
+  /* ── MEANING PANEL ── */
   .meaning {
     overflow: hidden;
     max-height: 0;
     opacity: 0;
-    transition: max-height .4s ease, opacity .35s ease, margin-top .3s ease;
+    transition: max-height .45s ease, opacity .35s ease, margin-top .3s ease;
     margin-top: 0;
   }
   .verse.focused .meaning {
-    max-height: 480px;
+    max-height: 600px;          /* ← raised from 480px — fits long Hindi text at large size */
     opacity: 1;
     margin-top: 14px;
   }
@@ -251,21 +282,19 @@
     letter-spacing: .04em;
     text-transform: none;
   }
-  .meaning-lbl-en {
-    margin-top: 12px;
-  }
+  .meaning-lbl-en { margin-top: 12px; }
   .meaning-txt {
     font-style: italic;
     font-size: calc(clamp(.85rem, 2vw, .95rem) * var(--ts));
     color: #b08040;
-    line-height: 1.65;
+    line-height: 1.7;
   }
   .meaning-txt.meaning-hin {
     font-family: 'Tiro Devanagari Sanskrit', serif;
     font-style: normal;
   }
 
-  /* tap hint */
+  /* ── TAP HINT ── */
   .tap-hint {
     text-align: center;
     font-family: 'Inter', sans-serif;
@@ -317,8 +346,8 @@
     <span class="ts-label">Text Size</span>
     <button type="button" class="ts-btn" data-size="default">Default</button>
     <button type="button" class="ts-btn" data-size="large">Large</button>
-    <button type="button" class="ts-btn" data-size="larger">Larger</button>
   </div>
+  <button type="button" class="hindi-btn" id="hindiBtn">हिंदी</button>
 </div>
 
 <div class="page" id="page">
@@ -376,7 +405,7 @@ const DATA = [
   ]},
   { sec:"Chaupai — Praised by the Gods", verses:[
     { tag:"Verse 13", hin:"Sahas badan tumharo jas gavain\nAs kahi Shripati kanth lagavain", dev:"सहस बदन तुम्हरो जस गावैं।\nअस कहि श्रीपति कंठ लगावैं॥", mean:"The thousand-mouthed serpent Sheshnag sings your glory — hearing this, Lord Ram embraced you to his heart.",
-      meanHin:'सहस्र मुख वाले शेषनाग भी आपका यश गाते हैं — ऐसा कहकर श्री रामचंद्र ने आपको अपने हृदय से लगाया।' },
+      meanHin:"सहस्र मुख वाले शेषनाग भी आपका यश गाते हैं — ऐसा कहकर श्री रामचंद्र ने आपको अपने हृदय से लगाया।" },
     { tag:"Verse 14", hin:"Sanakadik Brahmadi Muneesa\nNarad Sarad sahit Aheesa", dev:"संकादिक ब्रह्मादि मुनीसा।\nनारद सारद सहित अहीसा॥", mean:"Saints, sages, Lord Brahma, Narad, and Goddess Saraswati cannot fully describe your greatness.",
       meanHin:"सनकादिक ऋषि, ब्रह्मा जी, मुनिगण, नारद जी, सरस्वती और शेषनाग भी आपकी महिमा का पूर्ण वर्णन नहीं कर सकते।" },
     { tag:"Verse 15", hin:"Yam Kuber Digpal jahan te\nKavi kovid kahi sake kahan te", dev:"यम कुबेर दिगपाल जहाँ ते।\nकबि कोबिद कहि सके कहाँ ते॥", mean:"Even the Gods of Death, Wealth, and Guardians of the Directions fail to find words to describe you.",
@@ -491,7 +520,6 @@ DATA.forEach(sec => {
 
     el.addEventListener('click', () => {
       if (focused === el) {
-        // tap the focused verse again → unfocus
         el.classList.remove('focused');
         page.classList.remove('has-focus');
         focused = null;
@@ -508,12 +536,8 @@ DATA.forEach(sec => {
   });
 });
 
-/* ── Tap-to-focus only. Nothing here reacts to scrolling — highlighting,
-   the meaning panel, and the Devanagari label swap all happen purely
-   because a verse was tapped. ── */
 let focused = null;
 
-// tap outside any verse → clear focus
 document.addEventListener('click', e => {
   if (focused && !e.target.closest('.verse')) {
     focused.classList.remove('focused');
@@ -525,20 +549,42 @@ document.addEventListener('click', e => {
 /* ── Text size control ── */
 const tsButtons = document.querySelectorAll('.ts-btn');
 function applyTextSize(size, persist){
-  document.body.classList.remove('ts-large', 'ts-larger');
+  document.body.classList.remove('ts-large');
   if (size === 'large') document.body.classList.add('ts-large');
-  else if (size === 'larger') document.body.classList.add('ts-larger');
   tsButtons.forEach(b => b.classList.toggle('active', b.dataset.size === size));
   if (persist) {
-    try { localStorage.setItem('chalisa-text-size', size); } catch (e) {}
+    try { localStorage.setItem('chalisa-text-size', size); } catch(e) {}
   }
 }
 tsButtons.forEach(btn => {
   btn.addEventListener('click', () => applyTextSize(btn.dataset.size, true));
 });
 let savedSize = 'large';
-try { savedSize = localStorage.getItem('chalisa-text-size') || 'large'; } catch (e) {}
+try { savedSize = localStorage.getItem('chalisa-text-size') || 'large'; } catch(e) {}
 applyTextSize(savedSize, false);
+
+/* ── Hindi mode toggle ── */
+const hindiBtn = document.getElementById('hindiBtn');
+let hindiMode = false;
+try { hindiMode = localStorage.getItem('chalisa-hindi-mode') === 'true'; } catch(e) {}
+
+function applyHindiMode(active) {
+  hindiMode = active;
+  hindiBtn.classList.toggle('active', active);
+  document.body.classList.add('hindi-switching');
+  setTimeout(() => {
+    document.body.classList.toggle('hindi-mode', active);
+    document.body.classList.remove('hindi-switching');
+  }, 500);
+  try { localStorage.setItem('chalisa-hindi-mode', active); } catch(e) {}
+}
+
+hindiBtn.addEventListener('click', () => applyHindiMode(!hindiMode));
+
+if (hindiMode) {
+  document.body.classList.add('hindi-mode');
+  hindiBtn.classList.add('active');
+}
 </script>
 </body>
 </html>
